@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vehicle Monitoring Dashboard</title>
+
+  <!-- Leaflet (global L) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+  <!-- Chart.js (global Chart) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+
+  <!-- App -->
+  <link rel="stylesheet" href="css/styles.css" />
+  <script type="module" src="js/dashboard.js"></script>
+</head>
+<body>
+
+  <!-- ── 1. Header ──────────────────────────────────────────────────────────── -->
+  <header id="header">
+    <h1>Vehicle Monitoring Dashboard</h1>
+    <div id="header-meta">
+      <span id="conn-status" class="status-pill disconnected">DISCONNECTED</span>
+      <span id="last-seen">Last seen: —</span>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ── 2. Live metrics ────────────────────────────────────────────────────── -->
+    <section id="live-metrics" aria-label="Live metrics">
+      <article class="metric-card" id="card-accel">
+        <h2>Acceleration</h2>
+        <dl>
+          <dt>X</dt><dd id="val-ax">—</dd>
+          <dt>Y</dt><dd id="val-ay">—</dd>
+          <dt>Z</dt><dd id="val-az">—</dd>
+          <dt>|a|</dt><dd id="val-amag">—</dd>
+        </dl>
+      </article>
+
+      <article class="metric-card" id="card-location">
+        <h2>Location</h2>
+        <dl>
+          <dt>Lat</dt><dd id="val-lat">—</dd>
+          <dt>Lng</dt><dd id="val-lng">—</dd>
+          <dt>Speed</dt><dd id="val-speed">—</dd>
+        </dl>
+      </article>
+
+      <article class="metric-card" id="card-orientation">
+        <h2>Orientation</h2>
+        <dl>
+          <dt>Pitch</dt><dd id="val-pitch">—</dd>
+          <dt>Roll</dt><dd id="val-roll">—</dd>
+        </dl>
+      </article>
+    </section>
+
+    <!-- ── 3. Event ticker ────────────────────────────────────────────────────── -->
+    <section id="event-ticker" aria-label="Recent events">
+      <h2>Recent Events</h2>
+      <ol id="event-list" reversed>
+        <li class="event-empty">No events yet.</li>
+      </ol>
+    </section>
+
+    <!-- ── 4. Charts ──────────────────────────────────────────────────────────── -->
+    <section id="charts" aria-label="Live charts">
+      <div class="chart-wrap" id="chart-accel-wrap">
+        <h2>Acceleration (g)</h2>
+        <div class="chart-aspect">
+          <canvas id="chart-accel" role="img" aria-label="Live acceleration chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-wrap" id="chart-jerk-wrap">
+        <h2>Jerk Magnitude (g/s)</h2>
+        <div class="chart-aspect">
+          <canvas id="chart-jerk" role="img" aria-label="Jerk magnitude chart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 5. Map ──────────────────────────────────────────────────────────────── -->
+    <section id="map-section" aria-label="Live map">
+      <h2>Live Map</h2>
+      <div class="map-aspect">
+        <div id="map"></div>
+      </div>
+    </section>
+
+    <!-- ── 6. History table ───────────────────────────────────────────────────── -->
+    <section id="history-section" aria-label="Event history">
+      <h2>Event History</h2>
+      <div class="table-scroll">
+        <table id="history-table">
+          <thead>
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">Type</th>
+              <th scope="col">Severity</th>
+              <th scope="col">Details</th>
+              <th scope="col">GPS</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="5" class="table-empty">No history yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="footer">
+    <span>Vehicle Monitor &mdash; real-time telemetry</span>
+  </footer>
+
+</body>
+</html>

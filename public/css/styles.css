@@ -1,0 +1,399 @@
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Design tokens ───────────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg:          #0f1419;
+  --surface:     #1a1f26;
+  --surface-2:   #222831;
+  --surface-3:   #2a303b;
+
+  /* Borders */
+  --border:      #30363d;
+  --border-hover:#484f58;
+
+  /* Text */
+  --text:        #e6edf3;
+  --text-muted:  #8b949e;
+  --text-dim:    #586069;
+
+  /* Accent */
+  --accent:      #58a6ff;
+  --accent-dim:  #1f3d5c;
+
+  /* Event colours */
+  --col-collision: #f85149;
+  --col-rash:      #d29922;
+  --col-tow:       #e3b341;
+  --col-toppling:  #a371f7;
+
+  /* Event bg tints (for pills and row highlights) */
+  --bg-collision: #3d0f0d;
+  --bg-rash:      #3b2500;
+  --bg-tow:       #3b2f00;
+  --bg-toppling:  #261450;
+
+  /* Status */
+  --col-ok:      #3fb950;
+  --bg-ok:       #1a3624;
+
+  /* Severity */
+  --col-sev-high:   var(--col-collision);
+  --col-sev-medium: var(--col-rash);
+  --col-sev-low:    #79c0ff;
+
+  /* Layout */
+  --card-radius:  12px;
+  --card-padding: 16px;
+  --gap:          1rem;
+
+  /* Motion */
+  --transition: 150ms ease;
+
+  /* Typography */
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace,
+               'Courier New', monospace;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+html { font-size: 15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Monospace for every numeric/metric value */
+.metric-card dd,
+#history-table td,
+.event-ts {
+  font-family: var(--font-mono);
+}
+
+h2 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.85rem;
+}
+
+/* ── Pulse animation (connected state) ───────────────────────────────────── */
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.45); }
+  70%  { box-shadow: 0 0 0 6px rgba(63, 185, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+#header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  flex-wrap: wrap;
+  padding: 0.8rem 1.25rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+#header h1 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  flex: 1;
+  white-space: nowrap;
+}
+
+#header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  transition: background var(--transition), color var(--transition);
+}
+
+.status-pill::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.status-pill.connected {
+  background: var(--bg-ok);
+  color: var(--col-ok);
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.status-pill.disconnected {
+  background: var(--bg-collision);
+  color: var(--col-collision);
+}
+
+#last-seen {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+/* ── Main layout ─────────────────────────────────────────────────────────── */
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--gap) * 1.5);
+  padding: 1.25rem;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Shared card shell ───────────────────────────────────────────────────── */
+.metric-card,
+#event-ticker,
+.chart-wrap,
+#map-section,
+#history-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  transition: border-color var(--transition);
+}
+
+.metric-card:hover,
+.chart-wrap:hover {
+  border-color: var(--border-hover);
+}
+
+/* ── Metric cards ────────────────────────────────────────────────────────── */
+#live-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--gap);
+}
+
+.metric-card dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  row-gap: 0.4rem;
+  column-gap: 1rem;
+  align-items: baseline;
+}
+
+.metric-card dt {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+}
+
+.metric-card dd {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent);
+  transition: color var(--transition);
+}
+
+/* ── Event ticker ────────────────────────────────────────────────────────── */
+#event-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+#event-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.78rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+#event-list li:hover { border-color: var(--border); background: var(--surface-3); }
+
+.event-empty { color: var(--text-muted); justify-content: center; border: none !important; }
+
+.event-pill {
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.event-pill.collision  { background: var(--bg-collision); color: var(--col-collision); }
+.event-pill.rash_driving { background: var(--bg-rash);   color: var(--col-rash); }
+.event-pill.tow        { background: var(--bg-tow);      color: var(--col-tow); }
+.event-pill.toppling   { background: var(--bg-toppling); color: var(--col-toppling); }
+
+.event-ts   { color: var(--text-muted); flex-shrink: 0; font-size: 0.72rem; }
+.event-meta { color: var(--text); flex: 1; overflow: hidden;
+              white-space: nowrap; text-overflow: ellipsis; }
+
+/* ── Charts ──────────────────────────────────────────────────────────────── */
+#charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+
+.chart-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fixed aspect ratio container prevents layout shift while chart loads */
+.chart-wrap .chart-aspect {
+  position: relative;
+  width: 100%;
+  padding-bottom: 50%;   /* 2:1 aspect ratio */
+  flex: 1;
+  min-height: 160px;
+}
+
+.chart-wrap .chart-aspect canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Map ─────────────────────────────────────────────────────────────────── */
+/* Fixed aspect ratio prevents layout shift before Leaflet renders */
+.map-aspect {
+  position: relative;
+  width: 100%;
+  padding-bottom: 40%;   /* 2.5:1 */
+  min-height: 240px;
+  border-radius: calc(var(--card-radius) - 4px);
+  overflow: hidden;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── History table ───────────────────────────────────────────────────────── */
+.table-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  border-radius: calc(var(--card-radius) - 4px);
+}
+
+#history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+#history-table th,
+#history-table td {
+  padding: 0.5rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+#history-table thead th {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  background: var(--surface-2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+#history-table tbody tr {
+  transition: background var(--transition);
+}
+
+#history-table tbody tr:hover { background: var(--surface-2); }
+#history-table tbody tr:last-child td { border-bottom: none; }
+
+.table-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem !important;
+  font-size: 0.8rem;
+}
+
+.sev-high   { color: var(--col-sev-high); }
+.sev-medium { color: var(--col-sev-medium); }
+.sev-low    { color: var(--col-sev-low); }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+#footer {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+/* ── Responsive — 768px breakpoint ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  #main   { padding: 0.75rem; gap: 1rem; }
+
+  #header h1 { font-size: 0.85rem; }
+
+  /* Metric cards already use auto-fit — no override needed */
+
+  #charts { grid-template-columns: 1fr; }
+
+  .chart-wrap .chart-aspect { padding-bottom: 65%; }
+
+  .map-aspect { padding-bottom: 65%; }
+}
+
+@media (max-width: 480px) {
+  #main { padding: 0.5rem; gap: 0.75rem; }
+
+  #header { padding: 0.65rem 0.75rem; }
+  #header h1 { font-size: 0.8rem; }
+
+  #last-seen { display: none; }
+}
