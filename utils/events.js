@@ -19,7 +19,14 @@ function classifyFrame(frame, previousFrame) {
     .map((ev) => ({
       type: ev.type,
       severity: ev.severity ?? 'unknown',
-      metrics: ev.metrics ?? {},
+      // Always include frame-level GPS so every event is geolocated,
+      // then overlay any device-supplied metrics so they take precedence.
+      metrics: {
+        ...(frame.lat != null && { lat: frame.lat }),
+        ...(frame.lng != null && { lng: frame.lng }),
+        ...(frame.speed != null && { speed: frame.speed }),
+        ...(ev.metrics ?? {}),
+      },
       deviceTs: ev.deviceTs ?? frame.deviceTs ?? null,
       serverTs,
     }));
