@@ -63,24 +63,39 @@ broadcaster.onDeviceFrame(async (frame) => {
 
 // ── Startup ───────────────────────────────────────────────────────────────────
 
-function getLanIp() {
-  for (const ifaces of Object.values(os.networkInterfaces())) {
+function getLanIps() {
+  const results = [];
+  for (const [name, ifaces] of Object.entries(os.networkInterfaces())) {
     for (const iface of ifaces) {
-      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+      if (iface.family === 'IPv4' && !iface.internal) {
+        results.push({ name, address: iface.address });
+      }
     }
   }
-  return 'localhost';
+  return results;
 }
 
 httpServer.listen(PORT, '0.0.0.0', () => {
-  const lan = getLanIp();
+  const ips = getLanIps();
+  const divider = '  ' + '─'.repeat(52);
   console.log('');
   console.log('  Vehicle Monitor Server');
-  console.log('  ──────────────────────────────────');
-  console.log(`  Local :  http://localhost:${PORT}`);
-  console.log(`  LAN   :  http://${lan}:${PORT}`);
-  console.log(`  WS    :  ws://${lan}:${PORT}/ws   ← paste into ESP32 sketch`);
-  console.log('  ──────────────────────────────────');
+  console.log(divider);
+  console.log(`  Local  :  http://localhost:${PORT}`);
+  if (ips.length === 0) {
+    console.log('  (no LAN interfaces detected)');
+  } else {
+    ips.forEach(({ name, address }) => {
+      console.log(`  LAN    :  http://${address}:${PORT}  [${name}]`);
+    });
+    console.log('');
+    ips.forEach(({ name, address }) => {
+      console.log(`  WS     :  ws://${address}:${PORT}/ws  [${name}]  ← ESP32 WS_HOST`);
+    });
+  }
+  console.log(divider);
+  console.log('  Pick the WS line whose IP matches your ESP32\'s subnet.');
+  console.log('  ESP32 subnet = first 3 octets of its Serial "IP=" value.');
   console.log('');
 });
 
